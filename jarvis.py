@@ -12,7 +12,7 @@ from diction import translate,takeCommand
 from helpers import *
 from youtube import youtube
 from sys import platform
-import os
+import aifc
 import getpass
 import cv2
 
@@ -48,18 +48,42 @@ class Jarvis:
             'chrome', None, webbrowser.BackgroundBrowser(self.chrome_path)
         )
 
-    def wishMe(self) -> None:
+
+    def get_location_from_ip(self):
+        try:
+            response = requests.get("https://ipapi.co/json/")
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('latitude'), data.get('longitude')
+            else:
+                speak("Error fetching location from IP service.")
+                return None, None
+        except requests.exceptions.RequestException as e:
+            speak("Unable to retrieve location from the IP service.")
+            print(f"Exception: {e}")
+            return None, None
+
+
+    def wishMe(self):
         hour = int(datetime.datetime.now().hour)
         if hour >= 0 and hour < 12:
             speak("Good Morning SIR")
         elif hour >= 12 and hour < 18:
             speak("Good Afternoon SIR")
-
         else:
-            speak('Good Evening SIR')
+            speak("Good Evening SIR")
 
-        weather()
-        speak('I am JARVIS. Please tell me how can I help you SIR?')
+        speak("Retrieving your location for weather updates.")
+        latitude, longitude = self.get_location_from_ip()
+        if latitude and longitude:
+            global g
+            g.latlng = (latitude, longitude)  # Set location globally
+            weather()
+        else:
+            speak("Unable to fetch location. Weather updates unavailable.")
+        
+        speak("I am JARVIS. Please tell me how I can assist you, SIR.")
+
         takeCommand()
 
     def sendEmail(self, to, content) -> None:
@@ -118,7 +142,7 @@ class Jarvis:
         elif 'open google' in query:
             webbrowser.get('chrome').open_new_tab('https://google.com')
 
-        elif 'open stackoverflow' in query:
+        elif 'open stack overflow' in query:
             webbrowser.get('chrome').open_new_tab('https://stackoverflow.com')
 
         elif 'play music' in query:
@@ -148,18 +172,18 @@ class Jarvis:
 
         elif 'your master' in query:
             if platform == "win32" or "darwin":
-                speak('Gaurav is my master. He created me couple of days ago')
+                speak('Soma is my master. He created me couple of days ago')
             elif platform == "linux" or platform == "linux2":
                 name = getpass.getuser()
                 speak(name, 'is my master. He is running me right now')
 
         elif 'your name' in query:
-            speak('My name is JARVIS')
+            speak('My name is JANI')
         elif 'who made you' in query:
-            speak('I was created by my AI master in 2021')
+            speak('I was created by my AI master in 2024')
             
         elif 'stands for' in query:
-            speak('J.A.R.V.I.S stands for JUST A RATHER VERY INTELLIGENT SYSTEM')
+            speak('J.A.N.I stands for JUST IN TIME ASSISTANT FOR NECESSARY INSIGHTS.')
         elif 'open code' in query:
             if platform == "win32":
                 os.startfile(

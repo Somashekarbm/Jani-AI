@@ -1,9 +1,10 @@
-from vosk import Model, KaldiRecognizer
+# from vosk import Model, KaldiRecognizer
 import pyttsx3
 import wave
 import pyaudio
 import json
 from difflib import get_close_matches
+import speech_recognition as sr
 
 # Load your dictionary data
 data = json.load(open('data.json'))
@@ -18,43 +19,25 @@ def speak(audio):
     engine.runAndWait()
 
 def takeCommand():
-    # Load the Vosk model (ensure the path is correct)
-    model = Model(r"C:\Users\Somu\Desktop\J.A.R.V.I.S-master\vosk-model-small-en-us-0.15")  # Replace with your model path
-    recognizer = KaldiRecognizer(model, 16000)
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print('Listening...')
+        r.pause_threshold = 1
+        r.energy_threshold = 494
+        r.adjust_for_ambient_noise(source, duration=1.5)
+        audio = r.listen(source)
 
-    # Setup the microphone input
-    p = pyaudio.PyAudio()
-    stream = p.open(format=pyaudio.paInt16,
-                    channels=1,
-                    rate=16000,
-                    input=True,
-                    frames_per_buffer=8000)
-    stream.start_stream()
-
-    print("Listening...")
     try:
-        # Give a timeout of 10 seconds
-        for _ in range(int(10 * 16000 / 4000)):  # Adjust loop iterations to ~10 seconds
-            data = stream.read(4000, exception_on_overflow=False)
-            if recognizer.AcceptWaveform(data):
-                result = json.loads(recognizer.Result())
-                stream.stop_stream()
-                stream.close()
-                p.terminate()
-                text = result.get("text", "")
-                if text.strip() == "":
-                    print("No voice detected.")
-                    return "None"
-                print(f"Recognized: {text}")
-                return text
-        print("Timeout reached. No input detected.")
-        return "None"
+        print('Recognizing..')
+        query = r.recognize_google(audio, language='en-in')
+        print(f'User said: {query}\n')
+
     except Exception as e:
-        print(f"Error during recognition: {e}")
-        stream.stop_stream()
-        stream.close()
-        p.terminate()
-        return "None"
+        # print(e)
+
+        print('Say that again please...')
+        return 'None'
+    return query
 
 
 def translate(word):
