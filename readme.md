@@ -1,81 +1,130 @@
-pip install wolframalpha wikipedia winshell SpeechRecognition ecapture pyjokes twilio requests beautifulsoup4 pyttsx3 feedparser clint
+# JANI AI - Just in Time Assistant for Necessary Insights
 
+JANI AI is an AI-powered voice/text assistant with features like OCR, face recognition, conversational AI with memory, app automation, search functionalities, music & mood-based recommendations, screenshot capture, note-taking, news updates, document summarization, email & chat automation, AI-powered coding assistance, voice-based file search, storytelling, celebrity voice mimicry, interactive games, and encrypted storage.
 
-do-
-make sure that the voice reaad-out on the frontend stops when the user tells it to stop.
-make sure that on exit_assistant response from the backend the app stops working
-OCR
+## Features
+- Voice and text-based interaction
+- Conversational AI with memory
+- App automation
+- AI-powered coding assistance
+- News updates and document summarization
+- Screenshot capture and note-taking
+- Face recognition and OCR capabilities
+- Secure encrypted storage
 
+## Tech Stack
+- **Backend**: FastAPI, Python, Open-source LLMs
+- **Frontend**: React (Vite), Tailwind CSS
+- **Database**: SQLite / PostgreSQL (Configurable)
+- **LLM Integration**: Hugging Face models
+- **Deployment**: NGROK for Colab, Uvicorn for local server
 
-Features-
+## Setup
 
-Here are all the possible features supported-
+### Prerequisites
+- Python 3.8+
+- Node.js & npm (for frontend)
+- Virtual environment (optional but recommended)
+- NGROK (if running backend on Colab)
 
-1. Web Searches & Online Information Retrieval
-Search Wikipedia for summaries (wikipedia <topic>)
+### Backend Setup
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/your-repo/jani-ai.git
+   cd jani-ai
+   ```
+2. Create a virtual environment and activate it:
+   ```sh
+   python -m venv venv
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   ```
+3. Install dependencies:
+   ```sh
+   pip install -r requirements.txt
+   ```
+4. Run the FastAPI server:
+   ```sh
+   uvicorn main:app --reload --host 0.0.0.0 --port 8000
+   ```
+5. If running on Google Colab, use NGROK to expose the local server:
+   ```sh
+   !ngrok authtoken YOUR_NGROK_AUTH_TOKEN
+   !ngrok http 8000
+   ```
 
-Open YouTube (open youtube)
+### Frontend Setup
+1. Navigate to the frontend directory:
+   ```sh
+   cd frontend
+   ```
+2. Install dependencies:
+   ```sh
+   npm install
+   ```
+3. Start the development server:
+   ```sh
+   npm run dev
+   ```
 
-Search YouTube (search youtube for <query>)
+## API Endpoints
+### 1. General Chat
+- **Endpoint**: `POST /general_chat/`
+- **Description**: Handles general chat queries using LLMs.
+- **Request Body**:
+  ```json
+  {
+    "query": "What is AI?"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "response": "AI stands for Artificial Intelligence."
+  }
+  ```
 
-Open Google (open google)
+### 2. Ask AI
+- **Endpoint**: `POST /ask/`
+- **Description**: Provides AI-powered responses based on contextual memory.
+- **Request Body**:
+  ```json
+  {
+    "query": "Summarize this article"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "summary": "This article discusses..."
+  }
+  ```
 
-Search Google (search google for <query>)
+### 3. Voice Command Processing
+- **Endpoint**: `POST /voice_command/`
+- **Description**: Processes voice commands such as opening apps, taking notes, setting reminders, and searching Wikipedia.
+- **Request Body**:
+  ```json
+  {
+    "command": "search google for AI advancements"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "status": "success",
+    "message": "Searching Google for AI advancements",
+    "action": "google_search"
+  }
+  ```
 
-2. Time & Date Related Features
-Get the current time (what is the time)
+## Deployment
+- For local deployment, run `uvicorn main:app --host 0.0.0.0 --port 8000`
+- Use NGROK for exposing the backend if running on Google Colab
+- Frontend can be deployed using Vercel or Netlify
 
-Get today's date (what is today's date)
+## Contribution
+Feel free to contribute by creating a pull request or reporting issues.
 
-3. Reminders & Timers
-Set a reminder (remind me in <time> to <task>)
+## License
+MIT License
 
-Start a timer (set timer for <duration>)
-
-4. Notes & Document Management
-Take/create a note (take a note <content>)
-
-List saved notes (read my notes or list notes)
-
-5. Currency Conversion
-Convert between currencies (convert currency <amount> <from> to <to>)
-
-6. Schedule & Calendar Management
-Check schedule or appointments (what's on my schedule, my appointments, my calendar)
-
-Add an event to the calendar (add event <event details>)
-
-7. System & Utility Functions
-Open applications (open notepad, open calculator)
-
-Take a screenshot (take a screenshot)
-
-Empty the recycle bin (empty recycle bin)
-
-Lock the system (lock system)
-
-8. News & Headlines
-Get the latest headlines (tell me the news)
-
-Get a summary of news articles (summarize this news)
-
-9. Jokes & Fun Features
-Tell a joke (tell me a joke)
-
-10. Text-to-Speech (TTS)
-Speak responses using a speech queue (handles multiple speech requests)
-
-11. Web Automation & Navigation
-Open URLs in a web browser
-
-Perform automated Google or YouTube searches
-
-12. Background Processing & Multi-threading
-Handles speech processing in the background
-
-Uses thread pool execution for efficient command handling
-
-13. FastAPI Backend Integration
-API request handling for frontend communication
-
-CORS middleware enabled for cross-origin requests
