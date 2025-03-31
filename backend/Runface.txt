@@ -1,0 +1,5 @@
+To run faceRecognition.py 
+
+activate venv2 which is in py 3.10 as dlib was downloaded in py3.10 whl
+then i had pip install face-recognition
+then run

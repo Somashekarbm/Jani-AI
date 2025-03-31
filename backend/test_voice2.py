@@ -1,3 +1,4 @@
+#VoiceCommand.py
 import subprocess
 import queue
 import pyttsx3
@@ -21,6 +22,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from concurrent.futures import ThreadPoolExecutor
 
+# Import the helper functions
+from helpers import (
+    extract_time_from_query,
+    set_reminder,
+    start_timer,
+    convert_currency,
+    # translate_text,
+    check_schedule,
+    add_calendar_event,
+    handle_screenshot_request,
+    get_latest_headlines,
+    get_news_summary,
+    open_application,
+    close_application,
+    
+)
+
 # Pydantic model for voice command request
 class VoiceCommandRequest(BaseModel):
     command: str = Field(..., min_length=1, max_length=200)
@@ -28,7 +46,7 @@ class VoiceCommandRequest(BaseModel):
 app = FastAPI()
 
 # Enable CORS for frontend
-origins = ["http://localhost:5173"]
+origins = ["http://localhost:5173","http://localhost:5174"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -146,144 +164,9 @@ speech_queue = SpeechQueue()
 # Thread pool for handling concurrent tasks
 executor = ThreadPoolExecutor(max_workers=3)
 
-def handle_screenshot_request(query, response):
-    try:
-        screenshot_folder = "JANI-Screenshots"
-        os.makedirs(screenshot_folder, exist_ok=True)
-        
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        screenshot_filename = f"jani_screenshot_{timestamp}.png"
-        screenshot_path = os.path.join(screenshot_folder, screenshot_filename)
-        
-        screenshot = pyautogui.screenshot()
-        screenshot.save(screenshot_path)
-        
-        response["message"] = f"Screenshot saved to {screenshot_folder}"
-        response["action"] = "screenshot"
-        response["screenshot_path"] = screenshot_path
-        
-        return response
-    
-    except ImportError:
-        response["message"] = "PyAutoGUI is not installed. Please install it using 'pip install pyautogui'."
-        response["action"] = "error"
-        return response
-    
-    except Exception as e:
-        response["message"] = f"Error taking screenshot: {str(e)}"
-        response["action"] = "error"
-        return response
 
-def get_news_summary(headlines):
-    """Optional: Generate a summary of headlines"""
-    summary = "Today's Top Headlines:\n" + "\n".join(
-        [f"{i+1}. {headline}" for i, headline in enumerate(headlines)]
-    )
-    return summary
 
-def get_latest_headlines(max_headlines=5):
-    """
-    Fetch latest news headlines from multiple sources using web scraping
-    Provides fallback mechanisms to ensure headline retrieval
-    """
-    # List of news sources to scrape
-    news_sources = [
-        {
-            'url': 'https://news.google.com/rss',
-            'parser': 'google_news_rss'
-        },
-        {
-            'url': 'https://www.reuters.com/world/',
-            'parser': 'reuters_web'
-        },
-        {
-            'url': 'https://www.bbc.com/news',
-            'parser': 'bbc_news'
-        }
-    ]
 
-    # Headers to mimic browser request
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    }
-
-    def parse_google_news_rss(content):
-        """Parse Google News RSS Feed"""
-        try:
-            import feedparser
-            feed = feedparser.parse(content)
-            return [entry.title for entry in feed.entries[:max_headlines]]
-        except Exception as e:
-            print(f"Google News RSS Parsing Error: {e}")
-            return []
-
-    def parse_reuters_web(content):
-        """Parse Reuters Website"""
-        try:
-            soup = BeautifulSoup(content, 'html.parser')
-            headlines = soup.find_all(['h3', 'h2'], class_=lambda x: x and ('headline' in x.lower() or 'story-title' in x.lower()))
-            return [h.get_text(strip=True) for h in headlines[:max_headlines] if h.get_text(strip=True)]
-        except Exception as e:
-            print(f"Reuters Parsing Error: {e}")
-            return []
-
-    def parse_bbc_news(content):
-        """Parse BBC News Website"""
-        try:
-            soup = BeautifulSoup(content, 'html.parser')
-            headlines = soup.find_all(['h2', 'h3'], class_=lambda x: x and ('headlines' in str(x).lower() or 'story' in str(x).lower()))
-            return [h.get_text(strip=True) for h in headlines[:max_headlines] if h.get_text(strip=True)]
-        except Exception as e:
-            print(f"BBC News Parsing Error: {e}")
-            return []
-
-    # Parsing method mapping
-    parsers = {
-        'google_news_rss': parse_google_news_rss,
-        'reuters_web': parse_reuters_web,
-        'bbc_news': parse_bbc_news
-    }
-
-    # Collect headlines from all sources
-    all_headlines = []
-
-    for source in news_sources:
-        try:
-            # Different parsing for RSS vs web scraping
-            if source['parser'] == 'google_news_rss':
-                # Special handling for RSS feed
-                response = requests.get(source['url'])
-                headlines = parsers[source['parser']](response.content)
-            else:
-                # Web scraping for other sources
-                response = requests.get(source['url'], headers=headers)
-                headlines = parsers[source['parser']](response.text)
-
-            all_headlines.extend(headlines)
-
-            # If we have enough headlines, break
-            if len(all_headlines) >= max_headlines:
-                break
-
-        except Exception as e:
-            print(f"Error fetching from {source['url']}: {e}")
-            continue
-
-    # Fallback mechanism
-    if not all_headlines:
-        # Predefined headlines as absolute last resort
-        all_headlines = [
-            "Global Climate Summit Announces New Targets",
-            "Tech Innovation Continues to Reshape Industries", 
-            "Economic Outlook Shows Promising Signs of Recovery",
-            "Breakthrough in Renewable Energy Technologies",
-            "International Diplomacy Reaches New Milestones"
-        ]
-
-    # Deduplicate and limit headlines
-    unique_headlines = list(dict.fromkeys(all_headlines))[:max_headlines]
-
-    return unique_headlines
 
 def process_voice_command(query):
     """
@@ -312,11 +195,11 @@ def process_voice_command(query):
         # YouTube Operations
         elif 'open youtube' in query:
             webbrowser.open("https://www.youtube.com")
-            response["message"] = "YouTube opened successfully"
+            response["message"] = "Boss, YouTube opened successfully"
             response["action"] = "open_youtube"
 
         elif 'search youtube' in query:
-            search_term = query.replace("search youtube for", "").strip()
+            search_term = query.replace("search youtube for", "").replace("search youtube", "").strip()
             webbrowser.open(f"https://www.youtube.com/results?search_query={search_term.replace(' ', '+')}")
             response["message"] = f"Searching YouTube for {search_term}"
             response["action"] = "youtube_search"
@@ -324,20 +207,173 @@ def process_voice_command(query):
         # Google Operations
         elif 'open google' in query:
             webbrowser.open("https://www.google.com")
-            response["message"] = "Google opened successfully"
+            response["message"] = "Boss, Google opened successfully"
             response["action"] = "open_google"
 
+        #"search google for leetcode {any problem name}"
         elif 'search google' in query:
-            search_term = query.replace("search google for", "").strip()
+            search_term = query.replace("search google for", "").replace("search google", "").strip()
             webbrowser.open(f"https://www.google.com/search?q={search_term}")
             response["message"] = f"Searching Google for {search_term}"
             response["action"] = "google_search"
+            
+        # Reminder functionality "remind me in 1/2 minutes to check email" #works
+        elif "remind me" in query:
+            reminder_text = query.replace("remind me", "").strip()
+            
+            # Extract pattern like "remind me to call mom at 5pm"
+            # or "remind me in 30 minutes to check email"
+            reminder_time = extract_time_from_query(query)
+            
+            # Set up the reminder
+            formatted_time = set_reminder(reminder_text, reminder_time)
+            
+            response["message"] = f"Ok Boss, I'll remind you: {reminder_text} at {formatted_time}"
+            response["action"] = "set_reminder"
+        
+        # Currency conversion  #-- try "convert currency 1 rupees to dollars"
+        elif "convert currency" in query or "exchange rate" in query:
+            # First check if we have all needed info
+            result = convert_currency(query)
+            
+            if result["status"] == "incomplete":
+                # Need more information
+                response["message"] = result["message"]
+                response["action"] = "currency_conversion_request"
+            elif result["status"] == "error":
+                # Error occurred
+                response["status"] = "error"
+                response["message"] = result["message"]
+                response["action"] = "currency_conversion_error"
+            else:
+                # Successful conversion
+                response["message"] = result["message"]
+                response["action"] = "currency_conversion_result"
+            
+        # # Translation service
+        # elif "translate" in query:
+        #     # Parse the query for translation details
+        #     result = translate_text(query)
+            
+        #     if result["status"] == "incomplete":
+        #         # Need more information
+        #         response["message"] = result["message"]
+        #         response["action"] = "translation_request"
+        #     elif result["status"] == "error":
+        #         # Error occurred
+        #         response["status"] = "error"
+        #         response["message"] = result["message"]
+        #         response["action"] = "translation_error"
+        #     else:
+        #         # Successful translation
+        #         response["message"] = result["message"]
+        #         response["action"] = "translation_result"
 
         # Time
         elif 'the time' in query:
             current_time = datetime.datetime.now().strftime("%I:%M %p")
-            response["message"] = f"Sir, the time is {current_time}"
+            response["message"] = f"Boss, the time is {current_time}"
             response["action"] = "get_time"
+            
+        elif 'the date' in query or 'today\'s date' in query:
+            current_date = datetime.datetime.now().strftime("%B %d, %Y")
+            response["message"] = f"Boss, Today's date is {current_date}"
+            response["action"] = "get_date"
+            
+        elif "take a note" in query or "create a note" in query:
+            notes_dir = os.path.join(os.path.expanduser("~"), "Documents", "JANI_Notes")
+            os.makedirs(notes_dir, exist_ok=True)
+            
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            note_file = os.path.join(notes_dir, f"note_{timestamp}.txt")
+            
+            # Get the content for the note
+            note_content = query.replace("take a note", "").replace("create a note", "").strip()
+            
+            if not note_content:
+                response["message"] = "Boss, What would you like me to note down?"
+                response["action"] = "note_request_content"
+            else:
+                with open(note_file, "w") as f:
+                    f.write(note_content)
+                response["message"] = f"Boss, Note created and saved as note_{timestamp}.txt"
+                response["action"] = "note_created"
+                
+        #just lists the notes name present in the documents folder
+        elif "read my notes" in query or "list notes" in query:
+            notes_dir = os.path.join(os.path.expanduser("~"), "Documents", "JANI_Notes")
+            if os.path.exists(notes_dir):
+                notes = os.listdir(notes_dir)
+                if notes:
+                    notes_list = "\n".join(notes)
+                    response["message"] = f"Boss, Your notes are:\n{notes_list}"
+                    response["action"] = "list_notes"
+                else:
+                    response["message"] = "Boss, You don't have any notes yet."
+                    response["action"] = "no_notes"
+            else:
+                response["message"] = "Boss, Notes directory not found"
+                response["action"] = "notes_error"
+                
+        # Schedule checking  #checks for schedule working
+        elif "what's on my schedule" in query or "my appointments" in query or "my calendar" in query:
+            # Get schedule data
+            result = check_schedule(query)
+            
+            if result["status"] == "error":
+                response["status"] = "error"
+                response["message"] = result["message"]
+                response["action"] = "schedule_error"
+            else:
+                response["message"] = result["message"]
+                response["action"] = "check_schedule"
+                response["events"] = result["events"]
+                
+        # Calendar events  default_time = "12:00 PM" sets some event to 12:00pm , just tell "add event event1"
+        elif "add event" in query or "add to calendar" in query:
+            # This is a simplified version - in reality, you'd likely use a calendar API
+            event_details = query.replace("add event", "").replace("add to calendar", "").strip()
+            
+            # In a real implementation, you would parse the date and time
+            # For now, we'll use today's date and a default time
+            today = datetime.datetime.now().strftime("%Y-%m-%d")
+            default_time = "12:00 PM"
+            
+            # Add the event to the calendar
+            add_calendar_event(today, default_time, event_details)
+                
+            response["message"] = f"Boss, Event added: {event_details}"
+            response["action"] = "add_event"
+                
+        # Timer  #working try one minute  "set timer for one minute"
+        elif "set timer" in query or "start timer" in query:
+            # Extract time in minutes from query
+            time_str = ''.join(c for c in query if c.isdigit())
+            
+            if time_str:
+                minutes = int(time_str)
+                # Start the timer in background
+                start_timer(minutes)
+                
+                response["message"] = f"Boss, Timer set for {minutes} minutes"
+                response["action"] = "set_timer"
+            else:
+                response["message"] = "Please specify a time for the timer"
+                response["action"] = "timer_no_time"
+                
+        # Open applications  #works open notepad
+        elif "open" in query or "open app" in query:
+            response=open_application(query)
+            
+        #close the opened apps
+        elif "close" in query or "close app" in query:
+            response=close_application(query)
+                
+        elif "create folder" in query:   #working
+            folder_name = query.replace("create folder", "").strip()
+            os.makedirs(folder_name, exist_ok=True)
+            response["message"] = f"Boss, Folder '{folder_name}' created Successfully!"
+            response["action"] = "create_folder"
 
         # Jokes
         elif 'joke' in query:
@@ -421,14 +457,39 @@ def process_voice_command(query):
             subprocess.call(["shutdown", "/r"])
             response["message"] = "Restarting system"
             response["action"] = "restart_system"
+        
+        #below this all working
+        elif "system status" in query or "resource usage" in query:
+            # You'd need to implement system resource checks
+            import psutil
+            cpu = psutil.cpu_percent()
+            memory = psutil.virtual_memory().percent
+            response["message"] = f"CPU usage: {cpu}%, Memory usage: {memory}%"
+            response["action"] = "system_resources"
+            
+        # Volume control
+        elif "volume up" in query:
+            pyautogui.press("volumeup")
+            response["message"] = "Increasing volume"
+            response["action"] = "volume_up"
+            
+        elif "volume down" in query:
+            pyautogui.press("volumedown")
+            response["message"] = "Decreasing volume"
+            response["action"] = "volume_down"
+            
+        elif "mute" in query:
+            pyautogui.press("volumemute")
+            response["message"] = "Muting/Unmuting audio"
+            response["action"] = "volume_mute"
 
         # Personalized Interactions
         elif "who made you" in query or "who created you" in query:
-            response["message"] = "I have been created by Somashekar."
+            response["message"] = "I have been created by Somashekar and team."
             response["action"] = "creator_info"
 
         elif "who are you" in query:
-            response["message"] = "I am your virtual assistant named as JANI, created by Somashekar"
+            response["message"] = "I am your virtual assistant named as JANI, created by Somashekar and team."
             response["action"] = "self_intro"
 
         # Exit

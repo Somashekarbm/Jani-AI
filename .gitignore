@@ -27,6 +27,7 @@ dist-ssr
 # Virtual environments and environment files
 backend/.env
 backend/venv/
+backend/venv2/
 
 # Python cache
 backend/__pycache__/
@@ -34,6 +35,7 @@ backend/__pycache__/
 # JANI Screenshots
 backend/JANI-Screenshots/
 
+backend/face_encodings.pkl
 # Fine-tuning dataset
 dataset_used_for_fine_tuning.json
 

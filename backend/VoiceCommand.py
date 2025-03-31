@@ -526,6 +526,6 @@ async def voice_command(request: VoiceCommandRequest):
 
 if __name__ == "__main__":
     try:
-        uvicorn.run(app, host="0.0.0.0", port=8000)
+        uvicorn.run(app, host="0.0.0.0", port=8001)
     except KeyboardInterrupt:
         speech_queue.stop()
