@@ -12,6 +12,60 @@ import pyautogui
 import winsound
 from plyer import notification
 import platform
+import subprocess
+
+
+# Dictionary to map common names to actual executables or shortcut files
+APP_MAPPINGS = {
+    "command prompt": "cmd.exe",
+    "notepad": "notepad.exe",
+    "calculator": "calc.exe",
+    "task manager": "taskmgr.exe",
+    "control panel": "control",
+    "wordpad": "write.exe",
+    "paint": "mspaint.exe",
+    "file explorer": "explorer.exe",
+    "powershell": "powershell.exe",
+    "terminal": "wt.exe",  # Windows Terminal
+    "word": r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Word.lnk",
+    "excel": r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Excel.lnk",
+    "powerpoint": r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\PowerPoint.lnk",
+}
+
+def open_application(query):
+    app_name = query.replace("open", "").strip().lower()  # Normalize input
+
+    # Check if the app name is in the dictionary
+    if app_name in APP_MAPPINGS:
+        app_path = APP_MAPPINGS[app_name]
+        try:
+            os.startfile(app_path)  # Open mapped app
+            return {"message": f"Opening {app_name}", "action": "open_app"}
+        except Exception as e:
+            return {"message": f"Couldn't open {app_name}: {str(e)}", "action": "open_app_error"}
+
+    # Try opening unknown apps dynamically
+    try:
+        os.startfile(app_name)
+        return {"message": f"Opening {app_name}", "action": "open_app"}
+    except Exception as e:
+        return {"message": f"Couldn't open {app_name}: {str(e)}", "action": "open_app_error"}
+    
+    
+def close_application(query):
+    """Closes the specified application."""
+    app_name = query.replace("close", "").strip().lower()  # Normalize input
+
+    if app_name in APP_MAPPINGS:
+        process_name = APP_MAPPINGS[app_name]
+        try:
+            subprocess.run(["taskkill", "/F", "/IM", process_name], check=True)
+            return {"message": f"Closing {app_name}", "action": "close_app"}
+        except Exception as e:
+            return {"message": f"Couldn't close {app_name}: {str(e)}", "action": "close_app_error"}
+
+    return {"message": f"Application {app_name} not found in mappings", "action": "close_app_error"}
+
 
 
 def handle_screenshot_request(query, response):

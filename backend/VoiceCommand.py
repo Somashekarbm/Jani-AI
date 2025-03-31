@@ -1,3 +1,4 @@
+#VoiceCommand.py
 import subprocess
 import queue
 import pyttsx3
@@ -33,7 +34,8 @@ from helpers import (
     handle_screenshot_request,
     get_latest_headlines,
     get_news_summary,
-    
+    open_application,
+    close_application,
     
 )
 
@@ -193,7 +195,7 @@ def process_voice_command(query):
         # YouTube Operations
         elif 'open youtube' in query:
             webbrowser.open("https://www.youtube.com")
-            response["message"] = "Sir, YouTube opened successfully"
+            response["message"] = "Boss, YouTube opened successfully"
             response["action"] = "open_youtube"
 
         elif 'search youtube' in query:
@@ -205,7 +207,7 @@ def process_voice_command(query):
         # Google Operations
         elif 'open google' in query:
             webbrowser.open("https://www.google.com")
-            response["message"] = "Sir, Google opened successfully"
+            response["message"] = "Boss, Google opened successfully"
             response["action"] = "open_google"
 
         #"search google for leetcode {any problem name}"
@@ -226,7 +228,7 @@ def process_voice_command(query):
             # Set up the reminder
             formatted_time = set_reminder(reminder_text, reminder_time)
             
-            response["message"] = f"Ok Sir, I'll remind you: {reminder_text} at {formatted_time}"
+            response["message"] = f"Ok Boss, I'll remind you: {reminder_text} at {formatted_time}"
             response["action"] = "set_reminder"
         
         # Currency conversion  #-- try "convert currency 1 rupees to dollars"
@@ -270,12 +272,12 @@ def process_voice_command(query):
         # Time
         elif 'the time' in query:
             current_time = datetime.datetime.now().strftime("%I:%M %p")
-            response["message"] = f"Sir, the time is {current_time}"
+            response["message"] = f"Boss, the time is {current_time}"
             response["action"] = "get_time"
             
         elif 'the date' in query or 'today\'s date' in query:
             current_date = datetime.datetime.now().strftime("%B %d, %Y")
-            response["message"] = f"Sir, Today's date is {current_date}"
+            response["message"] = f"Boss, Today's date is {current_date}"
             response["action"] = "get_date"
             
         elif "take a note" in query or "create a note" in query:
@@ -289,12 +291,12 @@ def process_voice_command(query):
             note_content = query.replace("take a note", "").replace("create a note", "").strip()
             
             if not note_content:
-                response["message"] = "Sir, What would you like me to note down?"
+                response["message"] = "Boss, What would you like me to note down?"
                 response["action"] = "note_request_content"
             else:
                 with open(note_file, "w") as f:
                     f.write(note_content)
-                response["message"] = f"Sir, Note created and saved as note_{timestamp}.txt"
+                response["message"] = f"Boss, Note created and saved as note_{timestamp}.txt"
                 response["action"] = "note_created"
                 
         #just lists the notes name present in the documents folder
@@ -304,13 +306,13 @@ def process_voice_command(query):
                 notes = os.listdir(notes_dir)
                 if notes:
                     notes_list = "\n".join(notes)
-                    response["message"] = f"Sir, Your notes are:\n{notes_list}"
+                    response["message"] = f"Boss, Your notes are:\n{notes_list}"
                     response["action"] = "list_notes"
                 else:
-                    response["message"] = "Sir, You don't have any notes yet."
+                    response["message"] = "Boss, You don't have any notes yet."
                     response["action"] = "no_notes"
             else:
-                response["message"] = "Sir, Notes directory not found"
+                response["message"] = "Boss, Notes directory not found"
                 response["action"] = "notes_error"
                 
         # Schedule checking  #checks for schedule working
@@ -340,7 +342,7 @@ def process_voice_command(query):
             # Add the event to the calendar
             add_calendar_event(today, default_time, event_details)
                 
-            response["message"] = f"Sir, Event added: {event_details}"
+            response["message"] = f"Boss, Event added: {event_details}"
             response["action"] = "add_event"
                 
         # Timer  #working try one minute  "set timer for one minute"
@@ -353,27 +355,24 @@ def process_voice_command(query):
                 # Start the timer in background
                 start_timer(minutes)
                 
-                response["message"] = f"Sir, Timer set for {minutes} minutes"
+                response["message"] = f"Boss, Timer set for {minutes} minutes"
                 response["action"] = "set_timer"
             else:
                 response["message"] = "Please specify a time for the timer"
                 response["action"] = "timer_no_time"
                 
         # Open applications  #works open notepad
-        elif "open" in query:
-            app_name = query.replace("open", "").strip()
-            try:
-                os.startfile(app_name)
-                response["message"] = f"Opening {app_name}"
-                response["action"] = "open_app"
-            except Exception as e:
-                response["message"] = f"Couldn't open {app_name}: {str(e)}"
-                response["action"] = "open_app_error"
+        elif "open" in query or "open app" in query:
+            response=open_application(query)
+            
+        #close the opened apps
+        elif "close" in query or "close app" in query:
+            response=close_application(query)
                 
         elif "create folder" in query:   #working
             folder_name = query.replace("create folder", "").strip()
             os.makedirs(folder_name, exist_ok=True)
-            response["message"] = f"Sir, Folder '{folder_name}' created Successfully!"
+            response["message"] = f"Boss, Folder '{folder_name}' created Successfully!"
             response["action"] = "create_folder"
 
         # Jokes
