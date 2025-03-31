@@ -1,0 +1,9 @@
+try boss once instead of sir 
+open apps/close apps
+complete the weather code
+1.OCR
+2.make sure to add a command to take user voice commands with a command like "hello jani"
+3.add a background pic to main content (microsoft img generator)
+4. close apps/windows
+
+try to add a feature where it analyses the current screen to give a summary of what the user is looking at or what tasks is done/can be done
