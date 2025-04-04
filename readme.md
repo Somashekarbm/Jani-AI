@@ -151,6 +151,4 @@ JANI AI is an AI-powered voice/text assistant with features like OCR, face recog
 ## Contribution
 Feel free to contribute by creating a pull request or reporting issues.
 
-## License
-MIT License
 
