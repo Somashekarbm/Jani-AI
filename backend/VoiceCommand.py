@@ -250,25 +250,6 @@ def process_voice_command(query):
                 response["message"] = result["message"]
                 response["action"] = "currency_conversion_result"
             
-        # # Translation service
-        # elif "translate" in query:
-        #     # Parse the query for translation details
-        #     result = translate_text(query)
-            
-        #     if result["status"] == "incomplete":
-        #         # Need more information
-        #         response["message"] = result["message"]
-        #         response["action"] = "translation_request"
-        #     elif result["status"] == "error":
-        #         # Error occurred
-        #         response["status"] = "error"
-        #         response["message"] = result["message"]
-        #         response["action"] = "translation_error"
-        #     else:
-        #         # Successful translation
-        #         response["message"] = result["message"]
-        #         response["action"] = "translation_result"
-
         # Time
         elif 'the time' in query:
             current_time = datetime.datetime.now().strftime("%I:%M %p")
@@ -385,7 +366,7 @@ def process_voice_command(query):
         elif 'take a screenshot' in query:
             response = handle_screenshot_request(query, {})
 
-        # Music
+        # Music  #imp this
         elif 'play music' in query or "play song" in query:
             music_dir = r"C:\Users\Somu\Music"
             if os.path.exists(music_dir):
@@ -410,37 +391,86 @@ def process_voice_command(query):
             except Exception as e:
                 print(f"News fetching failed: {e}")
             
-
-        # Weather (needs valid API key)
+        # Weather
         elif "weather" in query:
-            api_key = "YOUR_OPENWEATHERMAP_API_KEY"  # Replace with actual key
-            base_url = "http://api.openweathermap.org/data/2.5/weather?"
+            import requests
+            import json
             
-            # Simulate city input (in real implementation, you'd need voice input)
-            city_name = "London"  # Default city
-            complete_url = base_url + "appid=" + api_key + "&q=" + city_name
+            api_key = "8ee685cd294a00e09aa8e067ce03e1d3"  # Your OpenWeatherMap API key
             
             try:
-                response_weather = requests.get(complete_url)
-                x = response_weather.json()
+                # Step 1: Get the current location using IP geolocation
+                # Using ipinfo.io which doesn't require an API key for basic usage
+                ip_response = requests.get("https://ipinfo.io/json")
+                ip_data = ip_response.json()
                 
-                if x["cod"] != "404":
-                    y = x["main"]
-                    current_temperature = y["temp"]
-                    current_pressure = y["pressure"]
-                    current_humidity = y["humidity"]
-                    z = x["weather"]
-                    weather_description = z[0]["description"]
+                # Extract location information
+                location = ip_data.get("loc", "").split(",")
+                city_name = ip_data.get("city", "Unknown")
+                region = ip_data.get("region", "")
+                country = ip_data.get("country", "")
+                
+                if len(location) != 2:
+                    # If we couldn't get location coordinates, use fallback method
+                    response["message"] = "Couldn't determine your location automatically. Using default location.\n"
+                    # Use geocoding API as fallback
+                    geocoding_url = f"http://api.openweathermap.org/geo/1.0/direct?q={city_name}&limit=1&appid={api_key}"
+                    geo_response = requests.get(geocoding_url)
+                    geo_data = geo_response.json()
                     
-                    weather_info = f"Temperature: {current_temperature} Kelvin, Pressure: {current_pressure} hPa, Humidity: {current_humidity}%, Description: {weather_description}"
-                    response["message"] = weather_info
-                    response["action"] = "weather_info"
+                    if not geo_data:
+                        response["message"] = "Sorry, I couldn't determine your location. Please try again later."
+                        response["action"] = "weather_error"
+                        return response
+                        
+                    lat = geo_data[0]['lat']
+                    lon = geo_data[0]['lon']
                 else:
-                    response["message"] = "City Not Found"
+                    # Use coordinates from IP geolocation
+                    lat = location[0]
+                    lon = location[1]
+                
+                # Step 2: Use the free Current Weather API instead of OneCall API (which requires subscription)
+                weather_url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&units=metric&appid={api_key}"
+                weather_response = requests.get(weather_url)
+                weather_data = weather_response.json()
+                
+                # Check if we got a valid response
+                if weather_data.get("cod") != 200:
+                    error_message = weather_data.get("message", "Unknown API error")
+                    response["message"] = f"Error from weather service: {error_message}"
                     response["action"] = "weather_error"
+                    return response
+                
+                # Format the location display
+                location_display = f"{city_name}, {region}, {country}" if region else f"{city_name}, {country}"
+                
+                # Extract weather information from the response
+                temp = weather_data['main']['temp']
+                feels_like = weather_data['main']['feels_like']
+                temp_min = weather_data['main']['temp_min']
+                temp_max = weather_data['main']['temp_max']
+                humidity = weather_data['main']['humidity']
+                wind_speed = weather_data['wind']['speed']
+                weather_description = weather_data['weather'][0]['description']
+                
+                # Format the weather information
+                weather_info = (
+                    f"Weather in your current location ({location_display}):\n"
+                    f"Currently: {weather_description.title()}\n"
+                    f"Temperature: {temp}°C (Feels like: {feels_like}°C)\n"
+                    f"Today's Range: {temp_min}°C to {temp_max}°C\n"
+                    f"Humidity: {humidity}%\n"
+                    f"Wind Speed: {wind_speed} m/s"
+                )
+                
+                response["message"] = weather_info
+                response["action"] = "weather_info"
+                    
             except Exception as e:
-                response["message"] = f"Weather fetch error: {str(e)}"
+                response["message"] = f"Unable to fetch weather information: {str(e)}\nPlease check your internet connection and API key."
                 response["action"] = "weather_error"
+
 
         # System Commands
         elif 'lock window' in query:
@@ -492,9 +522,9 @@ def process_voice_command(query):
             response["message"] = "I am your virtual assistant named as JANI, created by Somashekar and team."
             response["action"] = "self_intro"
 
-        # Exit
+        # Exit  #implement this later 
         elif 'exit' in query:
-            response["message"] = "Thanks for giving me your time"
+            response["message"] = "Thanks for using my services! Have a great day!"
             response["action"] = "exit_assistant"
 
         else:

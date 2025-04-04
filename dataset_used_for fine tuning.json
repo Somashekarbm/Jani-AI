@@ -94,6 +94,123 @@
       "input": "",
       "output": "You can ask 'will you be my friend' to express your sentiment."
     },
+      {
+          "instruction": "Tell me about Python",
+          "input": "",
+          "output": "You can say 'search Wikipedia for Python' to get a summary from Wikipedia."
+      },
+      {
+          "instruction": "I want to watch YouTube videos.",
+          "input": "",
+          "output": "You can say 'open YouTube' to start watching videos."
+      },
+      {
+          "instruction": "Search for AI tutorials on YouTube.",
+          "input": "",
+          "output": "You can say 'search YouTube for AI tutorials' to find relevant videos."
+      },
+      {
+          "instruction": "I need to search something on Google.",
+          "input": "",
+          "output": "You can say 'search Google for your query' to find results on Google."
+      },
+      {
+          "instruction": "What’s the time now?",
+          "input": "",
+          "output": "You can say 'What’s the time?' to get the current time."
+      },
+      {
+          "instruction": "What’s today’s date?",
+          "input": "",
+          "output": "You can say 'What’s the date today?' to get the current date."
+      },
+      {
+          "instruction": "Remind me to call Mom at 5 PM.",
+          "input": "",
+          "output": "You can say 'remind me to call Mom at 5 PM' to set a reminder."
+      },
+      {
+          "instruction": "Convert 100 rupees to dollars.",
+          "input": "",
+          "output": "You can say 'convert currency 100 rupees to dollars' to get the exchange rate."
+      },
+      {
+          "instruction": "Play some music.",
+          "input": "",
+          "output": "You can say 'play music' to start playing songs from your music directory."
+      },
+      {
+          "instruction": "Take a note.",
+          "input": "",
+          "output": "You can say 'take a note: your note content' to save a note."
+      },
+      {
+          "instruction": "Read my notes.",
+          "input": "",
+          "output": "You can say 'read my notes' to list your saved notes."
+      },
+      {
+          "instruction": "Check my schedule.",
+          "input": "",
+          "output": "You can say 'what's on my schedule?' to check your upcoming appointments."
+      },
+      {
+          "instruction": "Add an event to my calendar.",
+          "input": "",
+          "output": "You can say 'add event meeting at 3 PM' to add an event to your calendar."
+      },
+      {
+          "instruction": "Set a timer for 10 minutes.",
+          "input": "",
+          "output": "You can say 'set timer for 10 minutes' to start a countdown."
+      },
+      {
+          "instruction": "Open Notepad.",
+          "input": "",
+          "output": "You can say 'open Notepad' to launch the Notepad application."
+      },
+      {
+          "instruction": "Create a new folder named 'Projects'.",
+          "input": "",
+          "output": "You can say 'create folder Projects' to create a new folder."
+      },
+      {
+          "instruction": "Tell me a joke.",
+          "input": "",
+          "output": "You can say 'tell me a joke' to hear a joke."
+      },
+      {
+          "instruction": "Take a screenshot.",
+          "input": "",
+          "output": "You can say 'take a screenshot' to capture your screen."
+      },
+      {
+          "instruction": "Show me the latest news.",
+          "input": "",
+          "output": "You can say 'show news' to get the latest headlines."
+      },
+      {
+          "instruction": "What’s the weather like today?",
+          "input": "",
+          "output": "You can say 'what’s the weather today?' to get the current weather conditions."
+      },
+      {
+          "instruction": "Lock my computer.",
+          "input": "",
+          "output": "You can say 'lock window' to lock your system."
+      },
+      {
+          "instruction": "Shut down my system.",
+          "input": "",
+          "output": "You can say 'shutdown system' to power off your computer."
+      },
+      {
+          "instruction": "Restart my computer.",
+          "input": "",
+          "output": "You can say 'restart' to reboot your system."
+      }
+  ,
+  
     {
       "instruction": "How are you",
       "input": "",
@@ -549,6 +666,212 @@
             "input": "",
             "output": "You can say 'roll a dice' to get a random number."
           },
+            {
+                "instruction": "Find details about Albert Einstein on Wikipedia.",
+                "input": "",
+                "output": "You can say 'search Wikipedia for Albert Einstein' to get details."
+            },
+            {
+                "instruction": "Look up information on black holes.",
+                "input": "",
+                "output": "You can say 'search Wikipedia for black holes' to get information."
+            },
+            {
+                "instruction": "Show me today's headlines.",
+                "input": "",
+                "output": "You can say 'show news' to get the latest headlines."
+            },
+            {
+                "instruction": "What’s the current weather in my city?",
+                "input": "",
+                "output": "You can say 'show weather' to get the latest forecast."
+            },
+            {
+                "instruction": "Open YouTube.",
+                "input": "",
+                "output": "You can say 'open YouTube' to start watching videos."
+            },
+            {
+                "instruction": "I want to watch tutorials on Python.",
+                "input": "",
+                "output": "You can say 'search YouTube for Python tutorials'."
+            },
+            {
+                "instruction": "Can you search Google for the best laptops in 2025?",
+                "input": "",
+                "output": "You can say 'search Google for best laptops in 2025'."
+            },
+            {
+                "instruction": "What time is it right now?",
+                "input": "",
+                "output": "You can say 'what’s the time' to know the current time."
+            },
+            {
+                "instruction": "I need to remember to call mom at 6 PM.",
+                "input": "",
+                "output": "You can say 'remind me to call mom at 6 PM'."
+            },
+            {
+                "instruction": "Set a timer for 10 minutes.",
+                "input": "",
+                "output": "You can say 'set timer for 10 minutes'."
+            },
+            {
+                "instruction": "Tell me a funny joke.",
+                "input": "",
+                "output": "You can say 'tell me a joke' to hear something funny."
+            },
+            {
+                "instruction": "Play some music.",
+                "input": "",
+                "output": "You can say 'play music' to start listening."
+            },
+            {
+                "instruction": "Show me my calendar events for today.",
+                "input": "",
+                "output": "You can say 'what’s on my schedule' to view your events."
+            },
+            {
+                "instruction": "List all my saved notes.",
+                "input": "",
+                "output": "You can say 'read my notes' to list them."
+            },
+            {
+                "instruction": "Take a note that says 'Buy groceries tomorrow'.",
+                "input": "",
+                "output": "You can say 'take a note Buy groceries tomorrow'."
+            },
+            {
+                "instruction": "Convert 100 rupees to dollars.",
+                "input": "",
+                "output": "You can say 'convert currency 100 rupees to dollars'."
+            },
+            {
+                "instruction": "Open Google.",
+                "input": "",
+                "output": "You can say 'open Google' to start browsing."
+            },
+            {
+                "instruction": "Start my computer's lock screen.",
+                "input": "",
+                "output": "You can say 'lock window' to lock your computer."
+            },
+            {
+                "instruction": "Restart my system.",
+                "input": "",
+                "output": "You can say 'restart system' to reboot your computer."
+            },
+            {
+                "instruction": "Shut down the computer.",
+                "input": "",
+                "output": "You can say 'shutdown system' to power off."
+            },
+            {
+                "instruction": "Create a new folder named 'Projects'.",
+                "input": "",
+                "output": "You can say 'create folder Projects'."
+            },
+            {
+                "instruction": "Take a screenshot now.",
+                "input": "",
+                "output": "You can say 'take a screenshot' to capture your screen."
+            },
+            {
+                "instruction": "Search for job opportunities in AI.",
+                "input": "",
+                "output": "You can say 'search Google for AI jobs'."
+            },
+            {
+                "instruction": "Remind me to check my email in 30 minutes.",
+                "input": "",
+                "output": "You can say 'remind me in 30 minutes to check email'."
+            },
+            {
+                "instruction": "Search for the latest iPhone models.",
+                "input": "",
+                "output": "You can say 'search Google for latest iPhone'."
+            },
+            {
+                "instruction": "Find me Python courses online.",
+                "input": "",
+                "output": "You can say 'search Google for Python courses'."
+            },
+            {
+                "instruction": "Look up Elon Musk on Wikipedia.",
+                "input": "",
+                "output": "You can say 'search Wikipedia for Elon Musk'."
+            },
+            {
+                "instruction": "Tell me the weather forecast for today.",
+                "input": "",
+                "output": "You can say 'show weather' to check the forecast."
+            },
+            {
+                "instruction": "Open my calendar.",
+                "input": "",
+                "output": "You can say 'my calendar' to see your schedule."
+            },
+            {
+                "instruction": "Set a reminder for my doctor’s appointment at 5 PM.",
+                "input": "",
+                "output": "You can say 'remind me about my doctor’s appointment at 5 PM'."
+            },
+            {
+                "instruction": "What is the exchange rate for euros to dollars?",
+                "input": "",
+                "output": "You can say 'convert currency 1 euro to dollars'."
+            },
+            {
+                "instruction": "Find out about black holes on Wikipedia.",
+                "input": "",
+                "output": "You can say 'search Wikipedia for black holes'."
+            },
+            {
+                "instruction": "Show me my saved notes.",
+                "input": "",
+                "output": "You can say 'read my notes' to list them."
+            },
+            {
+                "instruction": "Make a note of my grocery list.",
+                "input": "",
+                "output": "You can say 'take a note of grocery list'."
+            },
+            {
+                "instruction": "Play a song.",
+                "input": "",
+                "output": "You can say 'play music' to start listening."
+            },
+            {
+                "instruction": "Set a timer for 5 minutes.",
+                "input": "",
+                "output": "You can say 'set timer for 5 minutes'."
+            },
+            {
+                "instruction": "What’s the latest tech news?",
+                "input": "",
+                "output": "You can say 'show news' to see top headlines."
+            },
+            {
+                "instruction": "Lock my screen.",
+                "input": "",
+                "output": "You can say 'lock window' to secure your PC."
+            },
+            {
+                "instruction": "Open the Notepad application.",
+                "input": "",
+                "output": "You can say 'open Notepad' to start it."
+            },
+            {
+                "instruction": "Close Chrome.",
+                "input": "",
+                "output": "You can say 'close Chrome' to exit the browser."
+            },
+            {
+                "instruction": "What’s my next appointment?",
+                "input": "",
+                "output": "You can say 'what's on my schedule' to check."
+            },
+        
           {
             "instruction": "Generate a strong password for me.",
             "input": "",
@@ -924,6 +1247,229 @@
               "input": "",
               "output": "You can say 'check battery' to see the remaining charge."
             },
+            
+              {
+                  "instruction": "Find the capital of France on Wikipedia.",
+                  "input": "",
+                  "output": "You can say 'search Wikipedia for the capital of France'."
+              },
+              {
+                  "instruction": "Look up the latest AI advancements.",
+                  "input": "",
+                  "output": "You can say 'search Google for latest AI advancements'."
+              },
+              {
+                  "instruction": "Can you tell me who invented the telephone?",
+                  "input": "",
+                  "output": "You can say 'search Wikipedia for telephone inventor'."
+              },
+              {
+                  "instruction": "Get today's top news stories.",
+                  "input": "",
+                  "output": "You can say 'show news' to see the top headlines."
+              },
+              {
+                  "instruction": "Find out the current weather in Delhi.",
+                  "input": "",
+                  "output": "You can say 'show weather' to check the forecast."
+              },
+              {
+                  "instruction": "Launch YouTube for me.",
+                  "input": "",
+                  "output": "You can say 'open YouTube' to start browsing videos."
+              },
+              {
+                  "instruction": "Look up ReactJS tutorials on YouTube.",
+                  "input": "",
+                  "output": "You can say 'search YouTube for ReactJS tutorials'."
+              },
+              {
+                  "instruction": "Show me the stock price of Tesla.",
+                  "input": "",
+                  "output": "You can say 'search Google for Tesla stock price'."
+              },
+              {
+                  "instruction": "I need a reminder to submit my assignment at 10 PM.",
+                  "input": "",
+                  "output": "You can say 'remind me to submit assignment at 10 PM'."
+              },
+              {
+                  "instruction": "Can you set a 15-minute countdown?",
+                  "input": "",
+                  "output": "You can say 'set timer for 15 minutes'."
+              },
+              {
+                  "instruction": "Tell me something funny.",
+                  "input": "",
+                  "output": "You can say 'tell me a joke' to hear a funny joke."
+              },
+              {
+                  "instruction": "Start playing my favorite playlist.",
+                  "input": "",
+                  "output": "You can say 'play music' to start your playlist."
+              },
+              {
+                  "instruction": "Show me what’s on my agenda today.",
+                  "input": "",
+                  "output": "You can say 'what’s on my schedule' to check your agenda."
+              },
+              {
+                  "instruction": "Read my saved to-do list.",
+                  "input": "",
+                  "output": "You can say 'read my notes' to list your saved tasks."
+              },
+              {
+                  "instruction": "Save a note saying 'Finish project report'.",
+                  "input": "",
+                  "output": "You can say 'take a note Finish project report'."
+              },
+              {
+                  "instruction": "Convert 50 pounds to Indian rupees.",
+                  "input": "",
+                  "output": "You can say 'convert currency 50 pounds to INR'."
+              },
+              {
+                  "instruction": "Launch the Chrome browser.",
+                  "input": "",
+                  "output": "You can say 'open Chrome' to start browsing."
+              },
+              {
+                  "instruction": "Secure my laptop immediately.",
+                  "input": "",
+                  "output": "You can say 'lock window' to lock your system."
+              },
+              {
+                  "instruction": "Reboot my computer now.",
+                  "input": "",
+                  "output": "You can say 'restart system' to restart your device."
+              },
+              {
+                  "instruction": "Power down my computer.",
+                  "input": "",
+                  "output": "You can say 'shutdown system' to turn off your PC."
+              },
+              {
+                  "instruction": "Create a new project folder.",
+                  "input": "",
+                  "output": "You can say 'create folder Project'."
+              },
+              {
+                  "instruction": "Capture a screenshot of my screen.",
+                  "input": "",
+                  "output": "You can say 'take a screenshot' to capture the screen."
+              },
+              {
+                  "instruction": "Search for job openings in cybersecurity.",
+                  "input": "",
+                  "output": "You can say 'search Google for cybersecurity jobs'."
+              },
+              {
+                  "instruction": "Remind me to buy milk when I get home.",
+                  "input": "",
+                  "output": "You can say 'remind me to buy milk when I reach home'."
+              },
+              {
+                  "instruction": "Find the latest iOS updates online.",
+                  "input": "",
+                  "output": "You can say 'search Google for latest iOS updates'."
+              },
+              {
+                  "instruction": "Locate top-rated Python courses.",
+                  "input": "",
+                  "output": "You can say 'search Google for best Python courses'."
+              },
+              {
+                  "instruction": "Check for articles on the Big Bang Theory.",
+                  "input": "",
+                  "output": "You can say 'search Wikipedia for Big Bang Theory'."
+              },
+              {
+                  "instruction": "Display today's temperature forecast.",
+                  "input": "",
+                  "output": "You can say 'show weather' to check the temperature."
+              },
+              {
+                  "instruction": "Show my weekly appointments.",
+                  "input": "",
+                  "output": "You can say 'what's on my schedule' to see your appointments."
+              },
+              {
+                  "instruction": "Schedule a reminder for my online class at 7 PM.",
+                  "input": "",
+                  "output": "You can say 'remind me about my online class at 7 PM'."
+              },
+              {
+                  "instruction": "How much is one Bitcoin worth today?",
+                  "input": "",
+                  "output": "You can say 'search Google for Bitcoin price'."
+              },
+              {
+                  "instruction": "Get information on machine learning algorithms.",
+                  "input": "",
+                  "output": "You can say 'search Wikipedia for machine learning algorithms'."
+              },
+              {
+                  "instruction": "Read out my notes from last week.",
+                  "input": "",
+                  "output": "You can say 'read my notes' to retrieve them."
+              },
+              {
+                  "instruction": "Make a to-do note saying 'Send email to manager'.",
+                  "input": "",
+                  "output": "You can say 'take a note Send email to manager'."
+              },
+              {
+                  "instruction": "Begin playing relaxing music.",
+                  "input": "",
+                  "output": "You can say 'play music' to start listening."
+              },
+              {
+                  "instruction": "Start a 20-minute timer for my workout.",
+                  "input": "",
+                  "output": "You can say 'set timer for 20 minutes'."
+              },
+              {
+                  "instruction": "What are the latest trends in tech news?",
+                  "input": "",
+                  "output": "You can say 'show news' to read the latest updates."
+              },
+              {
+                  "instruction": "Put my PC into sleep mode.",
+                  "input": "",
+                  "output": "You can say 'lock window' to secure your device."
+              },
+              {
+                  "instruction": "Launch Notepad for me.",
+                  "input": "",
+                  "output": "You can say 'open Notepad' to start writing."
+              },
+              {
+                  "instruction": "Exit the Chrome browser.",
+                  "input": "",
+                  "output": "You can say 'close Chrome' to quit the application."
+              },
+              {
+                  "instruction": "Check my upcoming events for tomorrow.",
+                  "input": "",
+                  "output": "You can say 'what's on my schedule' to view them."
+              },
+              {
+                  "instruction": "Find out who won the latest FIFA World Cup.",
+                  "input": "",
+                  "output": "You can say 'search Google for latest FIFA World Cup winner'."
+              },
+              {
+                  "instruction": "Look for best programming books to read.",
+                  "input": "",
+                  "output": "You can say 'search Google for best programming books'."
+              },
+              {
+                  "instruction": "Find the best open-source AI tools.",
+                  "input": "",
+                  "output": "You can say 'search Google for best open-source AI tools'."
+              }
+          ,
+          
             {
               "instruction": "Can you flip a coin",
               "input": "",

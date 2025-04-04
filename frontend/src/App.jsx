@@ -1,7 +1,9 @@
+// APP.jsx
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import styles from "./faceAuth.module.css";
 import Chatbot from "./chatbot";
+
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -155,9 +157,13 @@ const authenticateFace = async () => {
     });
     
     if (response.data.authenticated) {
-      setAuthStatus("Authentication successful!");
-      stopCamera();
-      setIsAuthenticated(true);
+      setAuthStatus("Welcome Boss!"); // Changed from "Authentication successful!"
+      
+      // Add a slight delay before stopping camera and switching to Chatbot
+      setTimeout(() => {
+        stopCamera();
+        setIsAuthenticated(true);
+      }, 1500); // 1.5 second delay to show the welcome message
     } else {
       setAuthStatus("Authentication failed. Please try again.");
     }
@@ -222,6 +228,7 @@ const authenticateFace = async () => {
     );
   }
   else{
+    
     return <Chatbot/>
   }
 };

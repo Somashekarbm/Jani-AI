@@ -1,3 +1,4 @@
+// chatbot.jsx
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "./Chatbot.css";
@@ -13,7 +14,7 @@ const Chatbot = () => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  const API_BASE_URL = "https://0e08-34-19-73-88.ngrok-free.app";
+  const API_BASE_URL = "https://e0d9-34-124-171-159.ngrok-free.app";
   const LOCAL_VOICE_API = "http://127.0.0.1:8001";
 
   // Load conversation history from localStorage on component mount
@@ -68,6 +69,15 @@ const Chatbot = () => {
       const endpoint = mode === "ask" ? "/ask" : "/general_chat";
       const res = await axios.post(`${API_BASE_URL}${endpoint}`, { query });
 
+
+        if (res.data.action === "exit_assistant") {
+          alert("Thanks for using my services! The assistant will now close.");
+          setTimeout(() => {
+              window.close();
+          }, 1000);
+          return;
+      }
+    
       const newResponse = { 
         input: query, 
         output: res.data.response || "No response received.",
@@ -150,6 +160,15 @@ const Chatbot = () => {
                         }
                     }
                 );
+
+                if (res.data.action === "exit_assistant") {
+                  alert("Thanks for using my services! The assistant will now close.");
+                  setTimeout(() => {
+                      window.close();
+                  }, 1000);
+                  return;
+              }
+              
 
                 let newResponse;
                 
@@ -301,7 +320,7 @@ const Chatbot = () => {
                   onClick={() => setMode("ask")} 
                   className={`mode-btn ${mode === "ask" ? "active" : ""}`}
                 >
-                  Fine-Tuned Chat
+                  Learn About Jani?
                 </button>
 
                 <button 
