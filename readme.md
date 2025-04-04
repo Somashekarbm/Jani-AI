@@ -29,8 +29,8 @@ JANI AI is an AI-powered voice/text assistant with features like OCR, face recog
 
 ### Backend Setup
 1. Clone the repository:
-   ```sh
-   git clone https://github.com/your-repo/jani-ai.git
+   ```
+   git clone https://github.com/Somashekarbm/Jani-AI.git
    cd jani-ai
    ```
 2. Create a virtual environment and activate it:
