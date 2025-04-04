@@ -1,6 +1,6 @@
-# JANI AI - Just in Time Assistant for Necessary Insights
+# JANI AI - A Virtual Companion - Just in Time Assistant for Necessary Insights
 
-JANI AI is an AI-powered voice/text assistant with features like OCR, face recognition, conversational AI with memory, app automation, search functionalities, music & mood-based recommendations, screenshot capture, note-taking, news updates, document summarization, email & chat automation, AI-powered coding assistance, voice-based file search, storytelling, celebrity voice mimicry, interactive games, and encrypted storage.
+JANI AI is an AI-powered voice/text assistant with features like OCR, face recognition, conversational AI with memory, app automation, search functionalities, music & mood-based recommendations, screenshot capture, note-taking, news updates, document summarization, email & chat automation, AI-powered coding assistance, voice-based file search.
 
 ## Features
 - Voice and text-based interaction
@@ -9,11 +9,11 @@ JANI AI is an AI-powered voice/text assistant with features like OCR, face recog
 - AI-powered coding assistance
 - News updates and document summarization
 - Screenshot capture and note-taking
-- Face recognition and OCR capabilities
-- Secure encrypted storage
+- Face recognition 
+
 
 ## Tech Stack
-- **Backend**: FastAPI, Python, Open-source LLMs
+- **Backend**: FastAPI, Flask (for Face Recognition), Python, Open-source LLMs
 - **Frontend**: React (Vite), Tailwind CSS
 - **Database**: SQLite / PostgreSQL (Configurable)
 - **LLM Integration**: Hugging Face models
@@ -50,6 +50,27 @@ JANI AI is an AI-powered voice/text assistant with features like OCR, face recog
    ```sh
    !ngrok authtoken YOUR_NGROK_AUTH_TOKEN
    !ngrok http 8000
+   ```
+
+### Face Recognition Server (Flask)
+1. Navigate to the backend directory (if applicable):
+   ```sh
+   cd backend
+   ```
+2. Create a virtual environment using Python 3.10:
+   ```sh
+   python3.10 -m venv venv
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   ```
+3. Install necessary packages:
+   ```sh
+   pip install cmake face_recognition
+   pip install -r requirements.txt  # if additional dependencies are listed
+   ```
+4. Download and install the `dlib` package available in the repo if necessary and there might an error with this package as of date.
+5. Run the Flask server:
+   ```sh
+   python FaceRecognition.py
    ```
 
 ### Frontend Setup
@@ -99,7 +120,12 @@ JANI AI is an AI-powered voice/text assistant with features like OCR, face recog
   }
   ```
 
-### 3. Voice Command Processing
+### 3. Face Authentication
+- **Using the Flask backend**: `POST /authenticate_user` and `POST /register_user`
+- return response of face recognition success or failure to the frontend for display
+
+
+### 4. Voice Command Processing
 - **Endpoint**: `POST /voice_command/`
 - **Description**: Processes voice commands such as opening apps, taking notes, setting reminders, and searching Wikipedia.
 - **Request Body**:
