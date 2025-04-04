@@ -67,7 +67,7 @@ JANI AI is an AI-powered voice/text assistant with features like OCR, face recog
    pip install cmake face_recognition
    pip install -r requirements.txt  # if additional dependencies are listed
    ```
-4. Download and install the `dlib` package available in the repo if necessary and there might an error with this package as of date.
+4. Download and install the `dlib` package available in the repo if you get a error with this package , so it's recommended to set the venv to either 3.8-3.12 and download as such from the offical repo or download the 3.10 version package through my repo where i have already done it.
 5. Run the Flask server:
    ```sh
    python FaceRecognition.py
