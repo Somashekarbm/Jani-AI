@@ -396,7 +396,7 @@ def process_voice_command(query):
             import requests
             import json
             
-            api_key = "8ee685cd294a00e09aa8e067ce03e1d3"  # Your OpenWeatherMap API key
+            api_key = "your_token"  # Your OpenWeatherMap API key
             
             try:
                 # Step 1: Get the current location using IP geolocation
