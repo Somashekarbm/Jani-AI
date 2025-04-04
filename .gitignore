@@ -41,3 +41,5 @@ dataset_used_for_fine_tuning.json
 
 # Documentation
 readme.md
+
+backend/face_encodings.pkl
