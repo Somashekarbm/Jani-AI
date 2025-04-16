@@ -1,46 +1,81 @@
 {
-  "name": "frontend",
-  "version": "0.0.0",
-  "private": true,
-  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
+  "name": "jani-assistant",
+  "version": "1.0.0",
+  "description": "JANI AI Assistant",
   "license": "ISC",
   "author": "",
-  "type": "module",
-  "main": "eslint.config.js",
+  "main": "electron/main.js",
+  "homepage": "./",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "create-batch-files": "node electron/create-batch-files.js",
+    "electron:dev": "npm run create-batch-files && concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "npm run create-batch-files && npm run build && electron-builder",
+    "start": "npm run create-batch-files && electron .",
+    "pack": "npm run create-batch-files && electron-builder --dir",
+    "dist": "npm run create-batch-files && electron-builder --win --x64 --publish never"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-slot": "^1.1.2",
-    "@tailwindcss/cli": "^4.0.17",
-    "@tailwindcss/vite": "^4.0.17",
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "electron-squirrel-startup": "^1.0.1",
     "lucide-react": "^0.484.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.4.1",
-    "tailwind-merge": "^3.0.2",
-    "tw-animate-css": "^1.2.4"
+    "tailwind-merge": "^3.0.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.21.0",
     "@types/node": "^22.13.14",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.21",
+    "concurrently": "^9.1.2",
+    "electron": "^35.1.4",
+    "electron-builder": "^24.6.3",
+    "electron-is-dev": "^3.0.1",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
-    "globals": "^15.15.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.0.17",
-    "vite": "^6.2.0"
+    "vite": "^6.2.0",
+    "wait-on": "^8.0.3"
+  },
+  "build": {
+    "appId": "com.Somashekar2002.jani-assistant",
+    "productName": "JANI Assistant",
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "node_modules/electron-is-dev/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../backend",
+        "to": "backend",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
   }
 }

@@ -16,11 +16,18 @@ import pyjokes
 import pyautogui
 import requests
 import ctypes
+import tempfile
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from PIL import Image
+import base64
+import torch
+from io import BytesIO
+from fastapi import FastAPI, HTTPException, APIRouter, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from concurrent.futures import ThreadPoolExecutor
+import speech_recognition as sr
+from helpers import get_vision_model
 
 # Import the helper functions
 from helpers import (
@@ -28,7 +35,6 @@ from helpers import (
     set_reminder,
     start_timer,
     convert_currency,
-    # translate_text,
     check_schedule,
     add_calendar_event,
     handle_screenshot_request,
@@ -42,9 +48,26 @@ from helpers import (
 # Pydantic model for voice command request
 class VoiceCommandRequest(BaseModel):
     command: str = Field(..., min_length=1, max_length=200)
-
+class ScreenAnalysisResponse(BaseModel):
+    description: str
+    suggestions: list
+    elements_detected: list
+    
 app = FastAPI()
 
+try:
+    processor, model = get_vision_model()
+except NameError:
+    # Fallback in case the import fails
+    from transformers import AutoProcessor, AutoModelForVision2Seq
+    
+    def get_vision_model():
+        processor = AutoProcessor.from_pretrained("microsoft/git-base",legacy=False)
+        model = AutoModelForVision2Seq.from_pretrained("microsoft/git-base")
+        return processor, model
+    
+    processor, model = get_vision_model()
+    
 # Enable CORS for frontend
 origins = ["http://localhost:5173","http://localhost:5174"]
 
@@ -216,6 +239,29 @@ def process_voice_command(query):
             webbrowser.open(f"https://www.google.com/search?q={search_term}")
             response["message"] = f"Searching Google for {search_term}"
             response["action"] = "google_search"
+            
+        elif "analyze current screen" in query or "analyze my screen" in query or "analyse my screen" in query:
+            # Call the screen analysis endpoint
+            import requests
+            
+            try:
+                # This assumes the API is running on the same server
+                analysis_result = requests.post("http://localhost:8010/analyze_screen").json()
+                
+                # Format the response
+                message = f"Here's what I see on your screen: {analysis_result['description']}\n\n"
+                
+                # Add suggestions
+                message += "You can:\n"
+                for suggestion in analysis_result['suggestions']:
+                    message += f"- {suggestion}\n"
+                
+                response["message"] = message
+                response["action"] = "screen_analysis"
+                
+            except Exception as e:
+                response["message"] = f"I couldn't analyze your screen. Error: {str(e)}"
+                response["action"] = "error_handling"
             
         # Reminder functionality "remind me in 1/2 minutes to check email" #works
         elif "remind me" in query:
@@ -396,7 +442,7 @@ def process_voice_command(query):
             import requests
             import json
             
-            api_key = "your_token"  # Your OpenWeatherMap API key
+            api_key = "8ee685cd294a00e09aa8e067ce03e1d3"  # Your OpenWeatherMap API key
             
             try:
                 # Step 1: Get the current location using IP geolocation
@@ -539,6 +585,32 @@ def process_voice_command(query):
 
     return response
 
+
+
+@app.post("/record_voice")
+async def record_voice():
+    r = sr.Recognizer()
+    try:
+        with sr.Microphone() as source:
+            print("Listening for voice input...")
+            r.adjust_for_ambient_noise(source)
+            audio = r.listen(source, timeout=5, phrase_time_limit=10)
+            
+        print("Processing audio...")
+        text = r.recognize_google(audio, language="en-IN")
+        print(f"Recognized: {text}")
+        return {"status": "success", "text": text}
+    except sr.WaitTimeoutError:
+        raise HTTPException(status_code=400, detail="Listening timed out")
+    except sr.UnknownValueError:
+        raise HTTPException(status_code=400, detail="Could not understand audio")
+    except sr.RequestError as e:
+        raise HTTPException(status_code=500, detail=f"Could not request results from speech service: {str(e)}")
+    except Exception as e:
+        print(f"Error in speech recognition: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    
+    
 @app.post("/voice_command")
 async def voice_command(request: VoiceCommandRequest):
     """Asynchronous voice command endpoint with thread pool execution"""
@@ -553,9 +625,78 @@ async def voice_command(request: VoiceCommandRequest):
             "message": f"Command processing failed: {str(e)}",
             "action": "error_handling"
         }
+        
+
+
+@app.post("/analyze_screen", response_model=ScreenAnalysisResponse)
+async def analyze_screen(background_tasks: BackgroundTasks):
+    try:
+        # Capture screenshot
+        screenshot = pyautogui.screenshot()
+        
+        # Save to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_file:
+            screenshot.save(tmp_file.name)
+            screenshot_path = tmp_file.name
+        
+        # Process with vision model
+        image = Image.open(screenshot_path)
+        
+        # Generate description with open-source vision model
+        inputs = processor(images=image, text="Describe what you see on this screen in detail", return_tensors="pt")
+        with torch.no_grad():
+            generated_ids = model.generate(
+                pixel_values=inputs["pixel_values"],
+                input_ids=inputs["input_ids"],
+                max_new_tokens=500,
+            )
+        screen_description = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+        
+        # Simple heuristics to detect UI elements
+        elements_detected = []
+        # Example heuristic analysis - in production you'd use more sophisticated methods
+        if "button" in screen_description.lower():
+            elements_detected.append("buttons")
+        if "text field" in screen_description.lower() or "input" in screen_description.lower():
+            elements_detected.append("text fields")
+        if "menu" in screen_description.lower():
+            elements_detected.append("menu items")
+        if "link" in screen_description.lower():
+            elements_detected.append("links")
+        
+        # Generate suggestions based on detected elements
+        suggestions = []
+        if "buttons" in elements_detected:
+            suggestions.append("You can click on buttons to perform actions")
+        if "text fields" in elements_detected:
+            suggestions.append("You can enter text in the input fields")
+        if "menu items" in elements_detected:
+            suggestions.append("You can navigate through the menu options")
+        if "links" in elements_detected:
+            suggestions.append("You can follow links to navigate to other pages")
+        
+        # Default suggestions if none were generated
+        if not suggestions:
+            suggestions = [
+                "You can use voice commands to interact with this screen",
+                "Try asking for specific actions related to what you see",
+                "Say 'help' to see all available commands"
+            ]
+        
+        # Schedule cleanup of temporary file
+        background_tasks.add_task(lambda: os.unlink(screenshot_path))
+        
+        return {
+            "description": screen_description,
+            "suggestions": suggestions,
+            "elements_detected": elements_detected
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Screen analysis failed: {str(e)}")
 
 if __name__ == "__main__":
     try:
-        uvicorn.run(app, host="0.0.0.0", port=8001)
+        uvicorn.run(app, host="0.0.0.0", port=8010)
     except KeyboardInterrupt:
         speech_queue.stop()

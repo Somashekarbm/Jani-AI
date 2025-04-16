@@ -2,7 +2,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import styles from "./faceAuth.module.css";
-import Chatbot from "./chatbot";
+// import Chatbot from "./chatbot";
+import Chatbot from "./chatbot copy";
+import Typewriter from "./components/Typewriter"; // Adjust path if needed
+
 
 
 const App = () => {
@@ -15,7 +18,8 @@ const App = () => {
   const streamRef = useRef(null);
 
 
-  const FACE_AUTH_API = "http://127.0.0.1:8000"; // Update this to your face auth API endpoint
+  const FACE_AUTH_API = "http://localhost:8002"
+   // Update this to your face auth API endpoint
 
   useEffect(() => {
     return () => {
@@ -158,12 +162,20 @@ const authenticateFace = async () => {
     
     if (response.data.authenticated) {
       setAuthStatus("Welcome Boss!"); // Changed from "Authentication successful!"
+      const speakWelcomeMessage = () => {
+        const utterance = new SpeechSynthesisUtterance("Welcome boss, I'm your assistant JAANI");
+        utterance.rate = 1;
+        utterance.pitch = 1.2;
+        window.speechSynthesis.speak(utterance);
+      };
+      speakWelcomeMessage();
       
       // Add a slight delay before stopping camera and switching to Chatbot
       setTimeout(() => {
         stopCamera();
         setIsAuthenticated(true);
-      }, 1500); // 1.5 second delay to show the welcome message
+      }, 1500);
+       // 1.5 second delay to show the welcome message
     } else {
       setAuthStatus("Authentication failed. Please try again.");
     }
@@ -183,8 +195,12 @@ const authenticateFace = async () => {
     return (
       <div className={styles["auth-container"]}>
         <div className={styles["auth-card"]}>
-          <h1>JANI - Your Personal Assistant</h1>
-          <p>Please authenticate yourself to continue</p>
+        <h1>
+          <Typewriter text="J A N I - Your Personal Assistant" speed={50}  />
+        </h1>
+        <p>
+          <Typewriter text="Please authenticate yourself to continue" speed={30} />
+        </p>
           
           <div className={styles["video-container"]}>
             <video 
@@ -232,45 +248,6 @@ const authenticateFace = async () => {
     return <Chatbot/>
   }
 };
-//   // Render chatbot interface after authentication
-//   return (  
-//     <div className="chat-container">
-//       <h2>JANI AI Assistant</h2>
 
-//       <h3>Helps you Navigate through your System!</h3>
-
-//       <textarea
-//         value={query}
-//         onChange={(e) => setQuery(e.target.value)}
-//         placeholder="Ask me anything..."
-//       />
-
-//       <div className="button-group">
-//         <button onClick={() => setMode("ask")} className={mode === "ask" ? "active" : ""}>
-//           Fine-Tuned Chat
-//         </button>
-
-//         <button onClick={() => setMode("general_chat")} className={mode === "general_chat" ? "active" : ""}>
-//            Open Chat
-//         </button>
-//       </div>
-
-//       <button onClick={handleSend} disabled={loading}>
-//         {loading ? "Thinking..." : "Ask AI"}
-//       </button>
-
-//       <button onClick={handleVoiceCommand} disabled={loading}>
-//         🎙 Speak to JANI
-//       </button>
-
-//       {response && (
-//         <div className="response-box">
-//           <p><strong>Input:</strong> {response.input}</p>
-//           <p><strong>Output:</strong> {response.output}</p>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
 
 export default App;

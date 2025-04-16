@@ -12,10 +12,14 @@ import io
 from PIL import Image
 
 app = Flask(__name__)
+# More specific CORS configuration
 CORS(app)
 
 # Path to save face encodings
-FACE_ENCODINGS_PATH = "face_encodings.pkl"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Create an absolute path to the file
+FACE_ENCODINGS_PATH = os.path.join(BASE_DIR, "face_encodings.pkl")
 
 # Load existing face encodings if available
 def load_face_encodings():
@@ -171,4 +175,4 @@ def register():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8000)
+    app.run(debug=True, port=8002, host='0.0.0.0')

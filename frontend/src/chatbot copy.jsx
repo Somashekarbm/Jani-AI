@@ -14,7 +14,7 @@ const Chatbot = () => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  const API_BASE_URL = "https://e0d9-34-124-171-159.ngrok-free.app";
+  const API_BASE_URL = "https://5df9-34-69-196-141.ngrok-free.app";  //remove '/' after the url everytime to run the chat API endpoint 
   const LOCAL_VOICE_API = "http://127.0.0.1:8010";
 
   // Load conversation history from localStorage on component mount
@@ -140,105 +140,100 @@ const Chatbot = () => {
             console.warn("Text-to-speech not supported");
         }
     };
-
-    try {
-        const recognition = new window.webkitSpeechRecognition();
-        recognition.lang = "en-IN";
-        recognition.start();
-
-        recognition.onresult = async (event) => {
-            const voiceCommand = event.results[0][0].transcript;
-            setQuery(voiceCommand);
-            setLoading(true);
-
-            try {
-                const res = await axios.post(`${LOCAL_VOICE_API}/voice_command`, 
-                    { command: voiceCommand },
-                    {
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
-
-                if (res.data.action === "exit_assistant") {
-                  alert("Thanks for using my services! The assistant will now close.");
-                  setTimeout(() => {
-                      window.close();
-                  }, 1000);
-                  return;
+      try {
+        setLoading(true);
+        
+        // Show user feedback that we're listening
+        setQuery("Listening...");
+        
+        // Call the FastAPI endpoint to record and recognize speech
+        const recordingResponse = await axios.post(`${LOCAL_VOICE_API}/record_voice`);
+        
+        if (recordingResponse.data.status === "success") {
+          const voiceCommand = recordingResponse.data.text;
+          setQuery(voiceCommand);
+          
+          // Process the recognized command
+          const res = await axios.post(`${LOCAL_VOICE_API}/voice_command`, 
+              { command: voiceCommand },
+              {
+                  headers: {
+                      'Content-Type': 'application/json'
+                  }
               }
-              
-
-                let newResponse;
-                
-                if (res.data.status === 'success') {
-                    newResponse = {
-                        input: voiceCommand,
-                        output: res.data.message || "Command executed successfully",
-                        action: res.data.action,
-                        timestamp: new Date().toISOString(),
-                        mode: "voice",
-                        voiceCommand: true
-                    };
-                    setResponse(newResponse);
-                    speakResponse(newResponse.output);
-                } else {
-                    newResponse = {
-                        input: voiceCommand,
-                        output: res.data.message || "Command processing failed",
-                        action: "error",
-                        timestamp: new Date().toISOString(),
-                        mode: "voice",
-                        voiceCommand: true,
-                        error: true
-                    };
-                    setResponse(newResponse);
-                    speakResponse(newResponse.output);
-                }
-                
-                saveConversation(newResponse);
-            } catch (error) {
-                console.error("Error processing voice command:", error);
-                
-                const errorResponse = {
-                    input: voiceCommand,
-                    output: "Network or server error occurred",
-                    action: "network_error",
-                    timestamp: new Date().toISOString(),
-                    mode: "voice",
-                    voiceCommand: true,
-                    error: true
-                };
-                
-                setResponse(errorResponse);
-                saveConversation(errorResponse);
-                speakResponse(errorResponse.output);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        recognition.onerror = (event) => {
-            console.error("Voice recognition error:", event);
-            const errorResponse = {
-                input: "Voice Recognition Error",
-                output: "An error occurred during voice recognition",
-                action: "recognition_error",
-                timestamp: new Date().toISOString(),
-                mode: "voice",
-                voiceCommand: true,
-                error: true
-            };
-            
-            setResponse(errorResponse);
-            saveConversation(errorResponse);
-            speakResponse(errorResponse.output);
-        };
-    } catch (error) {
+          );
+    
+          if (res.data.action === "exit_assistant") {
+            alert("Thanks for using my services! The assistant will now close.");
+            setTimeout(() => {
+                window.close();
+            }, 1000);
+            return;
+          }
+          
+          let newResponse;
+          
+          if (res.data.status === 'success') {
+              newResponse = {
+                  input: voiceCommand,
+                  output: res.data.message || "Command executed successfully",
+                  action: res.data.action,
+                  timestamp: new Date().toISOString(),
+                  mode: "voice",
+                  voiceCommand: true
+              };
+              setResponse(newResponse);
+              speakResponse(newResponse.output);
+          } else {
+              newResponse = {
+                  input: voiceCommand,
+                  output: res.data.message || "Command processing failed",
+                  action: "error",
+                  timestamp: new Date().toISOString(),
+                  mode: "voice",
+                  voiceCommand: true,
+                  error: true
+              };
+              setResponse(newResponse);
+              speakResponse(newResponse.output);
+          }
+          
+          saveConversation(newResponse);
+        } else {
+          // Handle recording error
+          const errorResponse = {
+              input: "Voice Recognition Error",
+              output: recordingResponse.data.message || "An error occurred during voice recognition",
+              action: "recognition_error",
+              timestamp: new Date().toISOString(),
+              mode: "voice",
+              voiceCommand: true,
+              error: true
+          };
+          
+          setResponse(errorResponse);
+          saveConversation(errorResponse);
+          speakResponse(errorResponse.output);
+        }
+      } catch (error) {
         console.error("Error initializing voice recognition:", error);
-    }
-  };
+        const errorResponse = {
+            input: "Voice Recognition Error",
+            output: "Network or server error occurred",
+            action: "network_error",
+            timestamp: new Date().toISOString(),
+            mode: "voice",
+            voiceCommand: true,
+            error: true
+        };
+        
+        setResponse(errorResponse);
+        saveConversation(errorResponse);
+        speakResponse(errorResponse.output);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
