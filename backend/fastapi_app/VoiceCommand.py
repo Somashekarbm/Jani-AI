@@ -27,7 +27,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from concurrent.futures import ThreadPoolExecutor
 import speech_recognition as sr
-from helpers import get_vision_model
+
 
 # Import the helper functions
 from helpers import (
@@ -48,25 +48,10 @@ from helpers import (
 # Pydantic model for voice command request
 class VoiceCommandRequest(BaseModel):
     command: str = Field(..., min_length=1, max_length=200)
-class ScreenAnalysisResponse(BaseModel):
-    description: str
-    suggestions: list
-    elements_detected: list
+
     
 app = FastAPI()
 
-try:
-    processor, model = get_vision_model()
-except NameError:
-    # Fallback in case the import fails
-    from transformers import AutoProcessor, AutoModelForVision2Seq
-    
-    def get_vision_model():
-        processor = AutoProcessor.from_pretrained("microsoft/git-base",legacy=False)
-        model = AutoModelForVision2Seq.from_pretrained("microsoft/git-base")
-        return processor, model
-    
-    processor, model = get_vision_model()
     
 # Enable CORS for frontend
 origins = ["http://localhost:5173","http://localhost:5174"]
@@ -240,28 +225,6 @@ def process_voice_command(query):
             response["message"] = f"Searching Google for {search_term}"
             response["action"] = "google_search"
             
-        elif "analyze current screen" in query or "analyze my screen" in query or "analyse my screen" in query:
-            # Call the screen analysis endpoint
-            import requests
-            
-            try:
-                # This assumes the API is running on the same server
-                analysis_result = requests.post("http://localhost:8010/analyze_screen").json()
-                
-                # Format the response
-                message = f"Here's what I see on your screen: {analysis_result['description']}\n\n"
-                
-                # Add suggestions
-                message += "You can:\n"
-                for suggestion in analysis_result['suggestions']:
-                    message += f"- {suggestion}\n"
-                
-                response["message"] = message
-                response["action"] = "screen_analysis"
-                
-            except Exception as e:
-                response["message"] = f"I couldn't analyze your screen. Error: {str(e)}"
-                response["action"] = "error_handling"
             
         # Reminder functionality "remind me in 1/2 minutes to check email" #works
         elif "remind me" in query:
@@ -411,6 +374,29 @@ def process_voice_command(query):
         # Screenshot
         elif 'take a screenshot' in query:
             response = handle_screenshot_request(query, {})
+            
+        elif "take selfie" in query or "take photo" in query:
+            import cv2
+            from datetime import datetime
+            
+            # Initialize camera
+            cap = cv2.VideoCapture(0)
+            if cap.isOpened():
+                # Capture frame
+                ret, frame = cap.read()
+                if ret:
+                    # Save image
+                    img_name = f"selfie_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
+                    cv2.imwrite(img_name, frame)
+                    response["message"] = f"Selfie taken and saved as {img_name}"
+                else:
+                    response["message"] = "Failed to capture image"
+            else:
+                response["message"] = "Camera not available"
+            
+            # Release camera
+            cap.release()
+            response["action"] = "take_selfie"
 
         # Music  #imp this
         elif 'play music' in query or "play song" in query:
@@ -516,8 +502,68 @@ def process_voice_command(query):
             except Exception as e:
                 response["message"] = f"Unable to fetch weather information: {str(e)}\nPlease check your internet connection and API key."
                 response["action"] = "weather_error"
+                
+        elif "record audio" in query or "record voice" in query:
+            import pyaudio
+            import wave
+            import threading
+            
+            # Extract duration if specified
+            duration = 5  # Default 5 seconds
+            digits = ''.join(c for c in query if c.isdigit())
+            if digits:
+                duration = int(digits)
+            
+            def record_audio(duration_sec, filename="recording.wav"):
+                CHUNK = 1024
+                FORMAT = pyaudio.paInt16
+                CHANNELS = 1
+                RATE = 44100
+                
+                p = pyaudio.PyAudio()
+                stream = p.open(format=FORMAT,
+                            channels=CHANNELS,
+                            rate=RATE,
+                            input=True,
+                            frames_per_buffer=CHUNK)
+                
+                frames = []
+                for i in range(0, int(RATE / CHUNK * duration_sec)):
+                    data = stream.read(CHUNK)
+                    frames.append(data)
+                
+                stream.stop_stream()
+                stream.close()
+                p.terminate()
+                
+                wf = wave.open(filename, 'wb')
+                wf.setnchannels(CHANNELS)
+                wf.setsampwidth(p.get_sample_size(FORMAT))
+                wf.setframerate(RATE)
+                wf.writeframes(b''.join(frames))
+                wf.close()
+            
+            # Start recording
+            filename = f"recording_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
+            threading.Thread(target=record_audio, args=(duration, filename)).start()
+            
+            response["message"] = f"Recording audio for {duration} seconds. Saving to {filename}"
+            response["action"] = "record_audio"
 
-
+        elif "define" in query or "meaning of" in query:
+            word = query.replace("define", "").replace("meaning of", "").strip()
+            try:
+                # Using PyDictionary or similar library
+                from PyDictionary import PyDictionary
+                dictionary = PyDictionary()
+                meaning = dictionary.meaning(word)
+                if meaning:
+                    response["message"] = f"Definition of {word}: {meaning}"
+                else:
+                    response["message"] = f"Sorry, I couldn't find the meaning of {word}"
+            except:
+                response["message"] = "Sorry, dictionary service is unavailable"
+            response["action"] = "dictionary_lookup"
         # System Commands
         elif 'lock window' in query:
             ctypes.windll.user32.LockWorkStation()
@@ -533,15 +579,21 @@ def process_voice_command(query):
             subprocess.call(["shutdown", "/r"])
             response["message"] = "Restarting system"
             response["action"] = "restart_system"
-        
-        #below this all working
-        elif "system status" in query or "resource usage" in query:
-            # You'd need to implement system resource checks
+            
+        elif "system info" in query or "computer info" in query:
+            import platform
             import psutil
-            cpu = psutil.cpu_percent()
-            memory = psutil.virtual_memory().percent
-            response["message"] = f"CPU usage: {cpu}%, Memory usage: {memory}%"
-            response["action"] = "system_resources"
+            
+            system_info = f"System: {platform.system()} {platform.version()}\n"
+            system_info += f"Processor: {platform.processor()}\n"
+            memory = psutil.virtual_memory()
+            system_info += f"RAM: {memory.total / (1024**3):.2f} GB (Used: {memory.percent}%)\n"
+            disk = psutil.disk_usage('/')
+            system_info += f"Disk: {disk.total / (1024**3):.2f} GB (Used: {disk.percent}%)"
+            
+            response["message"] = system_info
+            response["action"] = "system_info"
+        
             
         # Volume control
         elif "volume up" in query:
@@ -558,6 +610,31 @@ def process_voice_command(query):
             pyautogui.press("volumemute")
             response["message"] = "Muting/Unmuting audio"
             response["action"] = "volume_mute"
+            
+        elif "brightness" in query:
+            import screen_brightness_control as sbc
+            
+            if "increase brightness" in query:
+                current = sbc.get_brightness()[0]
+                sbc.set_brightness(min(current + 10, 100))
+                response["message"] = "Increased screen brightness"
+            elif "decrease brightness" in query:
+                current = sbc.get_brightness()[0]
+                sbc.set_brightness(max(current - 10, 0))
+                response["message"] = "Decreased screen brightness"
+            elif "set brightness" in query:
+                # Extract percentage
+                percent = int(''.join(c for c in query if c.isdigit()))
+                if 0 <= percent <= 100:
+                    sbc.set_brightness(percent)
+                    response["message"] = f"Set brightness to {percent}%"
+                else:
+                    response["message"] = "Please specify brightness between 0 and 100%"
+            else:
+                current = sbc.get_brightness()[0]
+                response["message"] = f"Current brightness is {current}%"
+            
+            response["action"] = "brightness_control"
 
         # Personalized Interactions
         elif "who made you" in query or "who created you" in query:
@@ -627,73 +704,6 @@ async def voice_command(request: VoiceCommandRequest):
         }
         
 
-
-@app.post("/analyze_screen", response_model=ScreenAnalysisResponse)
-async def analyze_screen(background_tasks: BackgroundTasks):
-    try:
-        # Capture screenshot
-        screenshot = pyautogui.screenshot()
-        
-        # Save to a temporary file
-        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_file:
-            screenshot.save(tmp_file.name)
-            screenshot_path = tmp_file.name
-        
-        # Process with vision model
-        image = Image.open(screenshot_path)
-        
-        # Generate description with open-source vision model
-        inputs = processor(images=image, text="Describe what you see on this screen in detail", return_tensors="pt")
-        with torch.no_grad():
-            generated_ids = model.generate(
-                pixel_values=inputs["pixel_values"],
-                input_ids=inputs["input_ids"],
-                max_new_tokens=500,
-            )
-        screen_description = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
-        
-        # Simple heuristics to detect UI elements
-        elements_detected = []
-        # Example heuristic analysis - in production you'd use more sophisticated methods
-        if "button" in screen_description.lower():
-            elements_detected.append("buttons")
-        if "text field" in screen_description.lower() or "input" in screen_description.lower():
-            elements_detected.append("text fields")
-        if "menu" in screen_description.lower():
-            elements_detected.append("menu items")
-        if "link" in screen_description.lower():
-            elements_detected.append("links")
-        
-        # Generate suggestions based on detected elements
-        suggestions = []
-        if "buttons" in elements_detected:
-            suggestions.append("You can click on buttons to perform actions")
-        if "text fields" in elements_detected:
-            suggestions.append("You can enter text in the input fields")
-        if "menu items" in elements_detected:
-            suggestions.append("You can navigate through the menu options")
-        if "links" in elements_detected:
-            suggestions.append("You can follow links to navigate to other pages")
-        
-        # Default suggestions if none were generated
-        if not suggestions:
-            suggestions = [
-                "You can use voice commands to interact with this screen",
-                "Try asking for specific actions related to what you see",
-                "Say 'help' to see all available commands"
-            ]
-        
-        # Schedule cleanup of temporary file
-        background_tasks.add_task(lambda: os.unlink(screenshot_path))
-        
-        return {
-            "description": screen_description,
-            "suggestions": suggestions,
-            "elements_detected": elements_detected
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Screen analysis failed: {str(e)}")
 
 if __name__ == "__main__":
     try:
