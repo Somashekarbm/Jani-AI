@@ -14,18 +14,13 @@ import winsound
 from plyer import notification
 import platform
 import subprocess
-# from transformers import AutoProcessor, AutoModelForImageTextToText
-# import torch
+
 
 
 
 
 # # Initialize the vision model
-# def get_vision_model():
-#     # Load model directly
-#     processor = AutoProcessor.from_pretrained("microsoft/git-base",legacy=False)
-#     model = AutoModelForImageTextToText.from_pretrained("microsoft/git-base")
-#     return processor, model
+
 
 
 # Dictionary to map common names to actual executables or shortcut files
